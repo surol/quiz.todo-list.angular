@@ -42,10 +42,10 @@ export class TODOService {
   storeList(
     list: TODOList,
     {
-      overrideRev,
+      overrideRev = list.rev,
     }: {
       readonly overrideRev?: number | undefined;
-    },
+    } = {},
   ): Observable<UpdateResult<TODOList>> {
     return new Observable(subscriber => {
 
@@ -54,11 +54,15 @@ export class TODOService {
       if (existing && existing.rev !== overrideRev) {
         subscriber.next({
           type: 'conflict',
-          proposedItem: list,
-          conflictingItem: existing,
+          proposed: list,
+          conflicting: existing,
         });
       } else {
-        subscriber.next({ type: 'ok' });
+
+        const updated: TODOList = { ...list, rev: overrideRev + 1 };
+
+        this._lists.set(list.uid, updated)
+        subscriber.next({ type: 'ok', updated });
       }
 
       subscriber.complete();

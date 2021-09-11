@@ -1,1 +1,1 @@
-<app-todo-list [list]="list$ | async"></app-todo-list>
+<app-todo-list [list]="list$ | async" (listChange)="storeList($event)"></app-todo-list>

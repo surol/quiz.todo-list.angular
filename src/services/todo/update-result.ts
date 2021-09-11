@@ -1,12 +1,14 @@
 export type UpdateResult<T> =
-  | UpdateResult.Ok
+  | UpdateResult.Ok<T>
   | UpdateResult.Conflict<T>;
 
 export namespace UpdateResult {
 
-  export interface Ok {
+  export interface Ok<T> {
 
     readonly type: 'ok';
+
+    readonly updated: T;
 
   }
 
@@ -14,9 +16,9 @@ export namespace UpdateResult {
 
     readonly type: 'conflict';
 
-    readonly proposedItem: T;
+    readonly proposed: T;
 
-    readonly conflictingItem: T;
+    readonly conflicting: T;
 
   }
 

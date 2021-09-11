@@ -1,6 +1,16 @@
 <ng-container *ngIf="list">
   <mat-card>
-    <mat-card-title>{{list.name}}</mat-card-title>
+    <mat-card-title>
+      <mat-form-field class="name-input">
+        <input #name matInput [formControl]="nameInput" (blur)="updateName()"/>
+        <button *ngIf="nameInput.enabled" mat-icon-button matSuffix (click)="updateName()">
+          <mat-icon>done</mat-icon>
+        </button>
+        <button *ngIf="nameInput.disabled" mat-icon-button matSuffix (click)="editName(name)">
+          <mat-icon>mode_edit</mat-icon>
+        </button>
+      </mat-form-field>
+    </mat-card-title>
     <mat-card-content>
       <ng-container *ngFor="let item of list.items; trackBy: itemUid">
         <app-todo-item [item]="item"></app-todo-item>
