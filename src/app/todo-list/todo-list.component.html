@@ -1,0 +1,10 @@
+<ng-container *ngIf="list">
+  <mat-card>
+    <mat-card-title>{{list.name}}</mat-card-title>
+    <mat-card-content>
+      <ng-container *ngFor="let item of list.items; trackBy: itemUid">
+        <app-todo-item [item]="item"></app-todo-item>
+      </ng-container>
+    </mat-card-content>
+  </mat-card>
+</ng-container>
