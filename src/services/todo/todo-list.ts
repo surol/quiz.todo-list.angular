@@ -1,6 +1,6 @@
-import { TODOItem } from './todo-item';
+import { TodoItem } from './todo-item';
 
-export interface TODOList {
+export interface TodoList {
 
   readonly uid: string;
 
@@ -8,6 +8,6 @@ export interface TODOList {
 
   readonly name: string;
 
-  readonly items: readonly TODOItem[];
+  readonly items: readonly TodoItem[];
 
 }

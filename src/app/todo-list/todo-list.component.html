@@ -1,20 +1,50 @@
-<ng-container *ngIf="list">
-  <mat-card>
-    <mat-card-title>
-      <mat-form-field class="name-input">
-        <input #name matInput [formControl]="nameInput" (blur)="updateName()"/>
-        <button *ngIf="nameInput.enabled" mat-icon-button matSuffix (click)="updateName()">
-          <mat-icon>done</mat-icon>
-        </button>
-        <button *ngIf="nameInput.disabled" mat-icon-button matSuffix (click)="editName(name)">
-          <mat-icon>mode_edit</mat-icon>
-        </button>
-      </mat-form-field>
-    </mat-card-title>
-    <mat-card-content>
-      <ng-container *ngFor="let item of list.items; trackBy: itemUid">
-        <app-todo-item [item]="item"></app-todo-item>
-      </ng-container>
-    </mat-card-content>
-  </mat-card>
-</ng-container>
+<mat-card *ngIf="list">
+
+  <mat-card-header>
+    <mat-form-field class="name-input">
+      <input
+        #name
+        matInput
+        [formControl]="nameControl"
+        (blur)="updateName()"
+      />
+      <button
+        *ngIf="nameControl.enabled"
+        mat-icon-button
+        matSuffix
+        type="button"
+        (click)="updateName()"
+        [disabled]="nameControl.invalid"
+      >
+        <mat-icon color="accent">done</mat-icon>
+      </button>
+      <button
+        *ngIf="nameControl.disabled"
+        mat-icon-button
+        matSuffix
+        (click)="editName(name)"
+      >
+        <mat-icon>mode_edit</mat-icon>
+      </button>
+    </mat-form-field>
+
+  </mat-card-header>
+
+  <mat-card-content>
+
+    <ng-container *ngFor="let item of list.items; index as i; trackBy: itemUid">
+      <app-todo-item
+        [label]="i + 1 + '.'"
+        [item]="item"
+        (itemChange)="updateItem(i, $event)"
+      ></app-todo-item>
+    </ng-container>
+
+    <app-todo-item
+      [label]="list.items.length + 1 + '.'"
+      (itemChange)="updateItem(list.items.length, $event)"
+    ></app-todo-item>
+
+  </mat-card-content>
+
+</mat-card>

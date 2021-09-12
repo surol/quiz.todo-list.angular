@@ -1,3 +1,46 @@
-<mat-card>
+<mat-form-field appearance="standard" class="todo-item-field">
+  <mat-checkbox
+    *ngIf="item"
+    matPrefix
+    [formControl]="doneControl"
+    value="done"
+    (change)="updateItem()"></mat-checkbox>
+  <mat-icon *ngIf="!item" matPrefix>add</mat-icon>
 
-</mat-card>
+  <mat-label>{{label}}</mat-label>
+  <input
+    #description
+    matInput
+    [formControl]="descriptionControl"
+  />
+
+  <div matSuffix>
+    <button
+      *ngIf="descriptionControl.enabled"
+      mat-icon-button
+      matSuffix
+      type="button"
+      (click)="updateItem()"
+      [disabled]="descriptionControl.invalid"
+    >
+      <mat-icon color="accent">done</mat-icon>
+    </button>
+    <button
+      *ngIf="descriptionControl.disabled"
+      mat-icon-button
+      matSuffix
+      (click)="editDescription(description)"
+    >
+      <mat-icon>mode_edit</mat-icon>
+    </button>
+    <button
+      *ngIf="item"
+      mat-icon-button
+      type="button"
+      (click)="removeItem()"
+      [disabled]="descriptionControl.enabled"
+    >
+      <mat-icon color="warn">delete_outline</mat-icon>
+    </button>
+  </div>
+</mat-form-field>

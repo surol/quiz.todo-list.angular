@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot, UrlTree } from '@angular/router';
-import { TODOService } from '../todo';
+import { TodoFactory } from '../todo';
 
 @Injectable({
   providedIn: 'root',
@@ -9,7 +9,7 @@ export class CanActivateTodoPage implements CanActivate {
 
   constructor(
     private readonly _router: Router,
-    private readonly _todoService: TODOService,
+    private readonly _todoFactory: TodoFactory,
   ) {
   }
 
@@ -17,11 +17,11 @@ export class CanActivateTodoPage implements CanActivate {
 
     const listUid = route.paramMap.get('list-uid');
 
-    if (listUid && this._todoService.validateUid(listUid)) {
+    if (listUid && this._todoFactory.validateUid(listUid)) {
       return true;
     }
 
-    const { uid } = this._todoService.createList();
+    const { uid } = this._todoFactory.createList();
 
     return this._router.createUrlTree(['/', uid]);
   }

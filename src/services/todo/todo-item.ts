@@ -1,10 +1,10 @@
-import { TODOItemStatus } from './todo-item-status';
+import { TodoItemStatus } from './todo-item-status';
 
-export interface TODOItem {
+export interface TodoItem {
 
   readonly uid: string;
 
-  readonly status: TODOItemStatus;
+  readonly status: TodoItemStatus;
 
   readonly description: string;
 

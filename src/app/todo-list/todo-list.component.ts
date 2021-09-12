@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
-import { TODOItem, TODOList, TODOService } from '../../services/todo';
+import { TodoItem, TodoList } from '../../services/todo';
 
 @Component({
   selector: 'app-todo-list',
@@ -10,49 +10,69 @@ import { TODOItem, TODOList, TODOService } from '../../services/todo';
 })
 export class TodoListComponent {
 
-  private _list?: TODOList | null | undefined;
+  private _list?: TodoList | null | undefined;
 
   @Output()
-  listChange = new EventEmitter<TODOList>();
+  listChange = new EventEmitter<TodoList>();
 
-  readonly nameInput: FormControl;
+  readonly nameControl: FormControl;
 
-  constructor(private readonly _todoService: TODOService, private readonly _changeDetector: ChangeDetectorRef) {
-    this.nameInput = new FormControl('', [Validators.required, Validators.minLength(3)]);
-    this.nameInput.disable();
+  constructor(private readonly _changeDetector: ChangeDetectorRef) {
+    this.nameControl = new FormControl(
+      { value: '', disabled: true },
+      [
+        Validators.required,
+        Validators.minLength(3),
+        Validators.maxLength(144),
+      ],
+    );
   }
 
   @Input()
-  get list(): TODOList | null | undefined {
+  get list(): TodoList | null | undefined {
     return this._list;
   }
 
-  set list(value: TODOList | null | undefined) {
+  set list(value: TodoList | null | undefined) {
     this._list = value;
-    this.nameInput.setValue(value?.name || '');
+    this.nameControl.setValue(value?.name);
+    this._changeDetector.markForCheck();
   }
 
   editName(element: HTMLInputElement): void {
-    if (this.list && !this.nameInput.enabled) {
-      this.nameInput.enable();
+    if (this.list && !this.nameControl.enabled) {
+      this.nameControl.enable();
       element.focus();
       element.select();
-      this._changeDetector.markForCheck();
     }
   }
 
   updateName(): void {
-    if (this.list && this.nameInput.enabled && this.nameInput.valid) {
+    if (this.list && this.nameControl.enabled && this.nameControl.valid) {
 
-      const name = this.nameInput.value;
+      const name = this.nameControl.value;
 
-      this.nameInput.disable();
-      this._changeDetector.markForCheck();
+      this.nameControl.disable();
       this.listChange.next({ ...this.list, name: name });
     }
   }
 
-  itemUid(_index: number, item: TODOItem): string {
+  updateItem(index: number, item: TodoItem | null): void {
+    if (this.list) {
+
+      const items = this.list.items.slice();
+
+      if (item) {
+        items[index] = item;
+      } else {
+        items.splice(index, 1);
+      }
+
+      this.listChange.next({ ...this.list, items })
+    }
+  }
+
+  itemUid(_index: number, item: TodoItem): string {
     return item.uid;
   }
 
