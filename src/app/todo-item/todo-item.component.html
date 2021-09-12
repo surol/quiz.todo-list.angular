@@ -12,6 +12,7 @@
     #description
     matInput
     [formControl]="descriptionControl"
+    (keypress)="submitDescription($event)"
   />
 
   <div matSuffix>

@@ -60,6 +60,12 @@ export class TodoItemComponent {
     }
   }
 
+  submitDescription(event: KeyboardEvent): void {
+    if (event.key === 'Enter') {
+      this.updateItem();
+    }
+  }
+
   private _resetEdit(): void {
     if (this._item) {
       this.descriptionControl.disable({ onlySelf: true, emitEvent: false });

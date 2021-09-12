@@ -35,15 +35,16 @@ export class TodoListComponent {
 
   set list(value: TodoList | null | undefined) {
     this._list = value;
-    this.nameControl.setValue(value?.name);
+    this.nameControl.setValue(value?.name, { onlySelf: true, emitEvent: false });
     this._changeDetector.markForCheck();
   }
 
   editName(element: HTMLInputElement): void {
     if (this.list && !this.nameControl.enabled) {
-      this.nameControl.enable();
+      this.nameControl.enable({ onlySelf: true, emitEvent: false });
       element.focus();
       element.select();
+      this._changeDetector.markForCheck();
     }
   }
 
@@ -52,8 +53,15 @@ export class TodoListComponent {
 
       const name = this.nameControl.value;
 
-      this.nameControl.disable();
+      this.nameControl.disable({ onlySelf: true, emitEvent: false });
       this.listChange.next({ ...this.list, name: name });
+      this._changeDetector.markForCheck();
+    }
+  }
+
+  submitName(event: KeyboardEvent): void {
+    if (event.key === 'Enter') {
+      this.updateName();
     }
   }
 

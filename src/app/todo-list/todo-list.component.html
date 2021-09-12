@@ -1,13 +1,16 @@
 <mat-card *ngIf="list">
 
   <mat-card-header>
-    <mat-form-field class="name-input">
+    <mat-form-field class="todo-list-name-field" appearance="standard">
+      <mat-label>TODO List</mat-label>
       <input
         #name
         matInput
         [formControl]="nameControl"
         (blur)="updateName()"
+        (keypress)="submitName($event)"
       />
+
       <button
         *ngIf="nameControl.enabled"
         mat-icon-button
