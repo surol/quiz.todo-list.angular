@@ -1,0 +1,8 @@
+@use 'sass:map';
+@use '~@angular/material' as mat;
+
+.is-active {
+  $palette: mat.define-palette(mat.$pink-palette);
+  background: mat.get-color-from-palette($palette, 'darker');
+  color: mat.get-color-from-palette($palette, 'darker-contrast');
+}

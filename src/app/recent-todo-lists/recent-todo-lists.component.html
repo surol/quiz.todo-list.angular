@@ -1,0 +1,8 @@
+<mat-nav-list>
+  <a mat-list-item
+     *ngFor="let list of (recentLists$ | async); trackBy: listUid"
+     [routerLink]="['', list.uid]"
+     [routerLinkActive]="['is-active']">
+    {{list.name}}
+  </a>
+</mat-nav-list>

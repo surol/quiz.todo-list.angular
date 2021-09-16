@@ -1,6 +1,11 @@
 <mat-sidenav-container class="todo-container">
   <mat-sidenav mode="side" opened class="todo-sidenav">
     <h2>Recent Lists:</h2>
+    <app-recent-todo-lists></app-recent-todo-lists>
+    <a mat-raised-button color="accent" [routerLink]="['']" class="add-todo-list">
+      <mat-icon>add</mat-icon>
+      New List
+    </a>
   </mat-sidenav>
   <mat-sidenav-content class="todo-content">
     <router-outlet></router-outlet>
