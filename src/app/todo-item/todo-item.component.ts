@@ -78,7 +78,7 @@ export class TodoItemComponent {
   }
 
   updateItem(): void {
-    if (this.descriptionControl.enabled && this.descriptionControl.valid) {
+    if (!this.descriptionControl.enabled || this.descriptionControl.valid) {
 
       const isNewItem = !this._item;
       const { item = this._todoFactory.createItem() } = this;

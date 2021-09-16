@@ -1,3 +1,4 @@
+export * from './firebase.service';
 export * from './todo-factory';
 export * from './todo-store';
 export * from './todo-item';

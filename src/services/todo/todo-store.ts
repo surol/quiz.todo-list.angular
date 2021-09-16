@@ -1,5 +1,7 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { BehaviorSubject, Observable, of, Subscription } from 'rxjs';
+import { collection, CollectionReference, doc, DocumentReference, getDoc, runTransaction } from '@firebase/firestore';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { FirebaseService } from './firebase.service';
 import { TodoFactory } from './todo-factory';
 import { TodoList } from './todo-list';
 import { UpdateResult } from './update-result';
@@ -12,25 +14,34 @@ export class TodoStore implements OnDestroy {
   private static MAX_RECENT_LISTS = 7;
   private static RECENT_LISTS_KEY = 'recentTodoLists';
 
-  private readonly _lists = new Map<string, TodoList>();
   private _recent?: BehaviorSubject<TodoList[]> | undefined;
   private subscription: Subscription;
 
-  constructor(private readonly _todoFactory: TodoFactory) {
+  constructor(
+    private readonly _todoFactory: TodoFactory,
+    private readonly _firebase: FirebaseService,
+  ) {
     this.subscription = Subscription.EMPTY;
   }
 
   loadOrCreateList(uid: string): Observable<TodoList> {
+    return new Observable(subscriber => {
+      getDoc(this._docRef(uid))
+        .then(snapshot => {
+          if (snapshot.exists()) {
 
-    const list = this._lists.get(uid);
+            const list = snapshot.data();
 
-    if (list) {
-      this._putRecentList(list);
+            subscriber.next(list)
+            this._putRecentList(list);
+          } else {
+            subscriber.next(this._todoFactory.createList({ uid }));
+          }
 
-      return of(list);
-    }
-
-    return of(this._todoFactory.createList({ uid }));
+          subscriber.complete();
+        })
+        .catch(error => subscriber.error(error))
+    });
   }
 
   storeList(
@@ -44,25 +55,44 @@ export class TodoStore implements OnDestroy {
     this._putRecentList(list);
 
     return new Observable(subscriber => {
+      runTransaction(this._firebase.store, async tx => {
 
-      const existing = this._lists.get(list.uid);
+        const ref = this._docRef(list.uid);
+        const doc = await tx.get(ref);
 
-      if (existing && existing.rev !== overrideRev) {
-        subscriber.next({
-          type: 'conflict',
-          proposed: list,
-          conflicting: existing,
-        });
-      } else {
+        if (doc.exists()) {
+
+          const existing = doc.data();
+
+          if (existing.rev !== overrideRev) {
+            subscriber.next({
+              type: 'conflict',
+              proposed: list,
+              conflicting: existing,
+            });
+            subscriber.complete();
+            return;
+          }
+        }
 
         const updated: TodoList = { ...list, rev: overrideRev + 1 };
 
-        this._lists.set(list.uid, updated)
-        subscriber.next({ type: 'ok', updated });
-      }
+        tx.set(ref, updated)
 
-      subscriber.complete();
+        subscriber.next({ type: 'ok', updated });
+        subscriber.complete();
+      }).catch(error => {
+        subscriber.error(error);
+      });
     });
+  }
+
+  private get collection(): CollectionReference<TodoList> {
+    return collection(this._firebase.store, 'todo-list') as CollectionReference<TodoList>;
+  }
+
+  private _docRef(uid: string): DocumentReference<TodoList> {
+    return doc(this.collection, uid);
   }
 
   recentLists(): Observable<TodoList[]> {
@@ -90,6 +120,7 @@ export class TodoStore implements OnDestroy {
       mostRecent,
       ...this.recent.getValue().filter(list => list.uid !== mostRecent.uid),
     ];
+    allRecent.sort(({ name: name1 }, { name: name2 }) => name1 < name2 ? -1 : (name1 > name2 ? 1 : 0));
 
     this.recent.next(allRecent.slice(0, TodoStore.MAX_RECENT_LISTS));
   }
