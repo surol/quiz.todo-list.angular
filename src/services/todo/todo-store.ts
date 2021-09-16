@@ -1,6 +1,7 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { collection, CollectionReference, doc, DocumentReference, getDoc, runTransaction } from '@firebase/firestore';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { FirebaseService } from './firebase.service';
 import { TodoFactory } from './todo-factory';
 import { TodoList } from './todo-list';
@@ -14,7 +15,7 @@ export class TodoStore implements OnDestroy {
   private static MAX_RECENT_LISTS = 7;
   private static RECENT_LISTS_KEY = 'recentTodoLists';
 
-  private _recent?: BehaviorSubject<TodoList[]> | undefined;
+  private _recent?: BehaviorSubject<readonly TodoList[]> | undefined;
   private subscription: Subscription;
 
   constructor(
@@ -96,14 +97,16 @@ export class TodoStore implements OnDestroy {
   }
 
   recentLists(): Observable<TodoList[]> {
-    return this.recent.asObservable();
+    return this.recent.pipe(
+      map(allRecent => allRecent.slice().sort(TodoList$compare)),
+    );
   }
 
-  private get recent(): BehaviorSubject<TodoList[]> {
+  private get recent(): BehaviorSubject<readonly TodoList[]> {
     if (!this._recent) {
 
       const serialized = localStorage.getItem(TodoStore.RECENT_LISTS_KEY);
-      const allRecent: TodoList[] = serialized ? JSON.parse(serialized) : [];
+      const allRecent: readonly TodoList[] = serialized ? JSON.parse(serialized) : [];
 
       this._recent = new BehaviorSubject(allRecent);
       this.subscription = this._recent.subscribe(list => {
@@ -120,7 +123,6 @@ export class TodoStore implements OnDestroy {
       mostRecent,
       ...this.recent.getValue().filter(list => list.uid !== mostRecent.uid),
     ];
-    allRecent.sort(({ name: name1 }, { name: name2 }) => name1 < name2 ? -1 : (name1 > name2 ? 1 : 0));
 
     this.recent.next(allRecent.slice(0, TodoStore.MAX_RECENT_LISTS));
   }
@@ -129,4 +131,8 @@ export class TodoStore implements OnDestroy {
     this.subscription.unsubscribe();
   }
 
+}
+
+function TodoList$compare({ name: name1 }: TodoList, { name: name2 }: TodoList): number {
+  return name1 < name2 ? -1 : (name1 > name2 ? 1 : 0);
 }
