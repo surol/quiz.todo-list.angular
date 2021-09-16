@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import { Injectable, OnDestroy } from '@angular/core';
+import { BehaviorSubject, Observable, of, Subscription } from 'rxjs';
 import { TodoFactory } from './todo-factory';
 import { TodoList } from './todo-list';
 import { UpdateResult } from './update-result';
@@ -7,18 +7,17 @@ import { UpdateResult } from './update-result';
 @Injectable({
   providedIn: 'root',
 })
-export class TodoStore {
+export class TodoStore implements OnDestroy {
 
   private static MAX_RECENT_LISTS = 7;
+  private static RECENT_LISTS_KEY = 'recentTodoLists';
 
   private readonly _lists = new Map<string, TodoList>();
-  private readonly _recent = new BehaviorSubject<TodoList[]>([]);
+  private _recent?: BehaviorSubject<TodoList[]> | undefined;
+  private subscription: Subscription;
 
   constructor(private readonly _todoFactory: TodoFactory) {
-  }
-
-  recentLists(): Observable<TodoList[]> {
-    return this._recent.asObservable();
+    this.subscription = Subscription.EMPTY;
   }
 
   loadOrCreateList(uid: string): Observable<TodoList> {
@@ -66,14 +65,37 @@ export class TodoStore {
     });
   }
 
-  private _putRecentList(mostRecent: TodoList) {
+  recentLists(): Observable<TodoList[]> {
+    return this.recent.asObservable();
+  }
+
+  private get recent(): BehaviorSubject<TodoList[]> {
+    if (!this._recent) {
+
+      const serialized = localStorage.getItem(TodoStore.RECENT_LISTS_KEY);
+      const allRecent: TodoList[] = serialized ? JSON.parse(serialized) : [];
+
+      this._recent = new BehaviorSubject(allRecent);
+      this.subscription = this._recent.subscribe(list => {
+        localStorage.setItem(TodoStore.RECENT_LISTS_KEY, JSON.stringify(list));
+      });
+    }
+
+    return this._recent;
+  }
+
+  private _putRecentList(mostRecent: TodoList): void {
 
     const allRecent: TodoList[] = [
       mostRecent,
-      ...this._recent.getValue().filter(list => list.uid !== mostRecent.uid),
+      ...this.recent.getValue().filter(list => list.uid !== mostRecent.uid),
     ];
 
-    this._recent.next(allRecent.slice(0, TodoStore.MAX_RECENT_LISTS));
+    this.recent.next(allRecent.slice(0, TodoStore.MAX_RECENT_LISTS));
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
   }
 
 }
