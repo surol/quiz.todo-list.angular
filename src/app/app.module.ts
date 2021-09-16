@@ -6,6 +6,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatSidenavModule } from '@angular/material/sidenav';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
@@ -33,6 +34,7 @@ import { TodoPageComponent } from './todo-page/todo-page.component';
     MatInputModule,
     ReactiveFormsModule,
     MatCheckboxModule,
+    MatSidenavModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

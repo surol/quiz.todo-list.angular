@@ -1,6 +1,4 @@
-<mat-card *ngIf="list">
-
-  <mat-card-header>
+<ng-container *ngIf="list">
     <mat-form-field class="todo-list-name-field" appearance="standard">
       <mat-label>TODO List</mat-label>
       <input
@@ -31,10 +29,6 @@
       </button>
     </mat-form-field>
 
-  </mat-card-header>
-
-  <mat-card-content>
-
     <ng-container *ngFor="let item of list.items; index as i; trackBy: itemUid">
       <app-todo-item
         [label]="i + 1 + '.'"
@@ -48,6 +42,4 @@
       (itemChange)="updateItem(list.items.length, $event)"
     ></app-todo-item>
 
-  </mat-card-content>
-
-</mat-card>
+</ng-container>

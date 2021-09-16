@@ -1,1 +1,8 @@
-<router-outlet></router-outlet>
+<mat-sidenav-container class="todo-container">
+  <mat-sidenav mode="side" opened class="todo-sidenav">
+    <h2>Recent Lists:</h2>
+  </mat-sidenav>
+  <mat-sidenav-content class="todo-content">
+    <router-outlet></router-outlet>
+  </mat-sidenav-content>
+</mat-sidenav-container>
